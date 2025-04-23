@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: sans-serif;
-            background-color: #f4f4f4;
+            background-color: #81fad6;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,21 +18,32 @@
         }
 
         form {
+            margin-top: 70px;
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 600px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+            width: 600px; 
         }
 
         div {
             margin-bottom: 15px;
+        }
+
+        .barra-topo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgb(82, 82, 82);
+            padding: 10px 0; 
+            z-index: 20; 
+            text-align: center; 
+        }
+
+        h1 {
+            color: #ffffff;
+            margin: 0; /* Remove a margem padrão do h1 para centralizar corretamente dentro da barra */
         }
 
         label {
@@ -43,16 +54,18 @@
         }
 
         input[type="text"],
-        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select,
         textarea {
             width: calc(100% - 12px);
             padding: 8px;
+            background-color: #fdc6a6;
             border: 1px solid #ddd;
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 16px;
         }
-
         textarea {
             resize: vertical;
             min-height: 80px;
@@ -88,15 +101,26 @@
 </head>
 
 <body>
-    <h1>Novo Cliente</h1>
+    <div class="barra-topo">
+        <h1>Novo Cliente</h1>
+    </div>
     <form id="clienteForm">
         <div>
             <label for="tipo">Tipo:</label>
-            <input type="text" id="tipo" name="tipo">
+            <select id="tipo" name="tipo">
+                <option value="">Selecione o Tipo</option>
+                <option value="Fisica">Pessoa Física</option>
+                <option value="Juridica">Pessoa Jurídica</option>
+            </select>
         </div>
         <div>
             <label for="categoria">Categoria:</label>
-            <input type="text" id="categoria" name="categoria">
+            <select id="categoria" name="categoria">
+                <option value="">Selecione a Categoria</option>
+                <option value="Consumidor Final">Consumidor Final</option>
+                <option value="Atacadista">Atacadista</option>
+                <option value="Varejista">Varejista</option>
+            </select>
         </div>
         <div>
             <label for="nome">Nome:</label>
@@ -116,7 +140,7 @@
         </div>
         <div>
             <label for="cep">CEP:</label>
-            <input type="text" id="cep" name="cep" required>
+            <input type="number" id="cep" name="cep" required>
         </div>
         <div>
             <label for="endereco">Endereço:</label>
@@ -124,7 +148,7 @@
         </div>
         <div>
             <label for="numero">Número:</label>
-            <input type="text" id="numero" name="numero" required>
+            <input type="number" id="numero" name="numero" required>
         </div>
         <div>
             <label for="bairro">Bairro:</label>
@@ -132,7 +156,7 @@
         </div>
         <div>
             <label for="celular">Celular:</label>
-            <input type="text" id="celular" name="celular" required>
+            <input type="tel" id="celular" name="celular" required>
         </div>
         <div>
             <label for="referencia">Referência:</label>
@@ -144,7 +168,11 @@
         </div>
         <div>
             <label for="status">Status:</label>
-            <input type="text" id="status" name="status">
+            <select id="status" name="status">
+                <option value="">Selecione o Status</option>
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+            </select>
         </div>
         <button type="button" onclick="enviarCliente()">Enviar Cliente</button>
         <div id="resposta"></div>
