@@ -172,57 +172,64 @@
 
         <script>
             function enviarCliente() {
-                const formData = new FormData(document.getElementById('clienteForm'));
+                const form = document.getElementById('clienteForm');
+                const formData = new FormData(form);
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
-
+            
+                // Convertendo os dados do formulário para um objeto JSON
                 const data = {};
                 formData.forEach((value, key) => {
-                  data[key] = value;
+                    data[key] = value;
                 });
                 data.action = 'createCliente';
-
-                const params = new URLSearchParams(data);
-
+            
+                // Mostrando o que será enviado
                 Swal.fire({
-                    icon: 'Atenção',
-                    title: 'Envidando:',
-                    text: 'Enviando para o servidor: \n\n' + params.toString(),
-                  });
-
+                    icon: 'info',
+                    title: 'Enviando:',
+                    text: 'Enviando para o servidor: \n\n' + JSON.stringify(data, null, 2),
+                });
+            
+                // Fazendo a requisição com content-type JSON
                 fetch(API_URL, {
-                  method: 'POST',
-                  body: params
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
                 })
                 .then(response => response.json())
                 .then(json => {
-                  if (json.status === 'success') {
+                    if (json.status === 'success' || !json.error) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: json.message || 'Cliente criado com sucesso!',
+                        });
+                        form.reset(); // Limpa o formulário
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: json.error || json.message || 'Ocorreu um erro ao criar o cliente.',
+                        });
+                    }
+                    
+                    // Mostrando a resposta do servidor
                     Swal.fire({
-                      icon: 'success',
-                      title: 'Sucesso!',
-                      text: json.message || 'Cliente criado com sucesso!',
+                        icon: 'info',
+                        title: 'Resposta!',
+                        text: 'Resposta do servidor: \n\n' + JSON.stringify(json, null, 2),
                     });
-                    document.getElementById('clienteForm').reset(); // Limpa o formulário
-                  } else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Erro!',
-                      text: json.message || 'Ocorreu um erro ao criar o cliente.',
-                    });
-                  }
-                  Swal.fire({
-                    icon: 'Atenção',
-                    title: 'Resposta!',
-                    text: 'Resposta do servidor: \n\n' + JSON.stringify(json, null, 2),
-                  });
                 })
                 .catch(error => {
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Erro de Conexão!',
-                    text: 'Não foi possível conectar ao servidor: ' + error,
-                  });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro de Conexão!',
+                        text: 'Não foi possível conectar ao servidor: ' + error,
+                    });
                 });
-              }
+            }
         </script>
     </form>
 </body>
