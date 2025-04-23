@@ -172,12 +172,11 @@
 
         <script>
             function enviarCliente() {
-                // Obtém os dados do formulário
                 const form = document.getElementById('clienteForm');
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
-                
-                // Cria exatamente o mesmo formato de objeto JSON que o Postman envia
-                const jsonData = {
+            
+                // Coletar dados do formulário em um objeto
+                const data = {
                     action: 'createCliente',
                     tipo: document.getElementById('tipo').value,
                     categoria: document.getElementById('categoria').value,
@@ -191,66 +190,65 @@
                     bairro: document.getElementById('bairro').value,
                     celular: document.getElementById('celular').value,
                     referencia: document.getElementById('referencia').value,
-                    observacao: document.getElementById('observacao').value || "",
-                    status: document.getElementById('status').value || ""
+                    observacao: document.getElementById('observacao').value,
+                    status: document.getElementById('status').value
                 };
-                
-                // Converte para string JSON
-                const jsonString = JSON.stringify(jsonData);
-                console.log('JSON enviado:', jsonString);
-                
-                // Mostra os dados que serão enviados
+            
+                // Mostrar o que está sendo enviado (exatamente como no Postman)
                 Swal.fire({
                     icon: 'info',
                     title: 'Enviando JSON:',
-                    text: 'Enviando para o servidor: \n\n' + JSON.stringify(jsonData, null, 2),
-                    confirmButtonText: 'Continuar',
-                    showCancelButton: false
-                }).then(() => {
-                    // Faz a requisição POST com os mesmos headers e payload do Postman
-                    fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: jsonString
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.id) {
-                            // Sucesso - mostra o ID retornado
+                    text: JSON.stringify(data, null, 2)
+                });
+
+                console.log("Dados a serem enviados:", data);
+                console.log("JSON a ser enviado:", JSON.stringify(data, null, 2));
+            
+                // Enviar como JSON - exatamente como o Postman faz
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    console.log("Resposta recebida:", response);
+                    return response.text(); // Pegar o texto antes de tentar interpretar como JSON
+                })
+                .then(text => {
+                    console.log("Texto da resposta:", text);
+                    try {
+                        const json = JSON.parse(text);
+                        if (json.id || !json.error) {
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Sucesso!',
-                                text: 'Cliente criado com ID: ' + data.id,
+                                text: 'Cliente criado com sucesso!'
                             });
-                            console.log('ID retornado:', data.id);
-                            form.reset(); // Limpa o formulário
-                        } else if (data.error) {
-                            // Erro - mostra a mensagem de erro
+                            form.reset();
+                        } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Erro!',
-                                text: data.error,
+                                text: json.error || 'Erro ao criar cliente'
                             });
-                            console.error('Erro retornado:', data.error);
-                        } else {
-                            // Resposta inesperada - mostra o conteúdo
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Resposta:',
-                                text: JSON.stringify(data),
-                            });
-                            console.error('Resposta inesperada:', data);
                         }
-                    })
-                    .catch(error => {
-                        console.error('Erro na requisição:', error);
+                    } catch (e) {
+                        console.error("Erro ao parsear JSON:", e);
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Erro de Conexão!',
-                            text: 'Não foi possível conectar ao servidor: ' + error,
+                            icon: 'warning',
+                            title: 'Resposta não é JSON',
+                            text: text
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro na fetch:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro de Conexão!',
+                        text: 'Não foi possível conectar ao servidor: ' + error
                     });
                 });
             }
