@@ -172,6 +172,84 @@
 
         <script>
             function enviarCliente() {
+                // Obtém os dados do formulário
+                const form = document.getElementById('clienteForm');
+                const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
+                
+                // Cria exatamente o mesmo formato de objeto JSON que o Postman envia
+                const jsonData = {
+                    action: 'createCliente',
+                    tipo: document.getElementById('tipo').value,
+                    categoria: document.getElementById('categoria').value,
+                    nome: document.getElementById('nome').value,
+                    apelido: document.getElementById('apelido').value,
+                    estado: document.getElementById('estado').value,
+                    cidade: document.getElementById('cidade').value,
+                    cep: document.getElementById('cep').value,
+                    endereco: document.getElementById('endereco').value,
+                    numero: document.getElementById('numero').value,
+                    bairro: document.getElementById('bairro').value,
+                    celular: document.getElementById('celular').value,
+                    referencia: document.getElementById('referencia').value,
+                    observacao: document.getElementById('observacao').value || "",
+                    status: document.getElementById('status').value || ""
+                };
+                
+                // Converte para string JSON
+                const jsonString = JSON.stringify(jsonData);
+                
+                // Mostra os dados que serão enviados
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Enviando JSON:',
+                    text: 'Enviando para o servidor: \n\n' + JSON.stringify(jsonData, null, 2),
+                    confirmButtonText: 'Continuar',
+                    showCancelButton: false
+                }).then(() => {
+                    // Faz a requisição POST com os mesmos headers e payload do Postman
+                    fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: jsonString
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.id) {
+                            // Sucesso - mostra o ID retornado
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                text: 'Cliente criado com ID: ' + data.id,
+                            });
+                            form.reset(); // Limpa o formulário
+                        } else if (data.error) {
+                            // Erro - mostra a mensagem de erro
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro!',
+                                text: data.error,
+                            });
+                        } else {
+                            // Resposta inesperada - mostra o conteúdo
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Resposta:',
+                                text: JSON.stringify(data),
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro na requisição:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro de Conexão!',
+                            text: 'Não foi possível conectar ao servidor: ' + error,
+                        });
+                    });
+                });
+            }
                 const form = document.getElementById('clienteForm');
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
             
