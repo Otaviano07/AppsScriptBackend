@@ -102,7 +102,7 @@
 
 <body>
     <div class="barra-topo">
-        <h1>Novo Cliente</h1>
+        <h1>Criar Novo Cliente</h1>
     </div>
     <form id="clienteForm">
         <div>
@@ -181,28 +181,30 @@
             function enviarCliente() {
                 const formData = new FormData(document.getElementById('clienteForm'));
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
+              
                 const data = {};
                 formData.forEach((value, key) => {
-                    data[key] = value;
+                  data[key] = value;
                 });
-                data.action = 'createCliente'; 
+                data.action = 'createCliente';
+              
+                const params = new URLSearchParams(data);
 
+                document.getElementById('resposta').innerText = params.toString();
+              
                 fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
+                  method: 'POST',
+                  body: params
                 })
                 .then(response => response.json())
-                .then(result => {
-                    document.getElementById('resposta').innerText = JSON.stringify(result, null, 2);
-                    document.getElementById('clienteForm').reset(); 
+                .then(json => {
+                
+                  document.getElementById('resposta').innerText = JSON.stringify(json, null, 2);
                 })
                 .catch(error => {
-                    document.getElementById('resposta').innerText = 'Erro ao enviar dados: ' + error;
+                  document.getElementById('resposta').innerText = 'Erro: ' + error;
                 });
-            }
+              }              
         </script>
     </form>
 </body>
