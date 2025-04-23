@@ -200,9 +200,6 @@
                     title: 'Enviando JSON:',
                     text: JSON.stringify(data, null, 2)
                 });
-
-                console.log("Dados a serem enviados:", data);
-                console.log("JSON a ser enviado:", JSON.stringify(data, null, 2));
             
                 // Enviar como JSON - exatamente como o Postman faz
                 fetch(API_URL, {
