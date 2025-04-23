@@ -176,51 +176,43 @@
                 const formData = new FormData(form);
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
             
-                // Convertendo os dados do formulário para um objeto JSON
+                // Convertendo FormData para objeto
                 const data = {};
                 formData.forEach((value, key) => {
                     data[key] = value;
                 });
                 data.action = 'createCliente';
             
-                // Mostrando o que será enviado
+                // Método 1: Envio via URLSearchParams (compatível com Google Apps Script)
+                const params = new URLSearchParams();
+                for (const key in data) {
+                    params.append(key, data[key]);
+                }
+                
+                // Mostrar o que está sendo enviado
                 Swal.fire({
                     icon: 'info',
                     title: 'Enviando:',
-                    text: 'Enviando para o servidor: \n\n' + JSON.stringify(data, null, 2),
+                    text: 'Enviando para o servidor:\n\n' + params.toString(),
                 });
             
-                // Fazendo a requisição com content-type JSON
+                // Usando fetch com modo no-cors para evitar problemas de CORS
                 fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
+                    mode: 'no-cors',  // Importante para o Google Apps Script
+                    body: params
                 })
-                .then(response => response.json())
-                .then(json => {
-                    if (json.status === 'success' || !json.error) {
+                .then(response => {
+                    // Como estamos usando no-cors, não podemos acessar os dados da resposta
+                    // Mas podemos verificar se a requisição foi realizada
+                    if (response.type === 'opaque') {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Sucesso!',
-                            text: json.message || 'Cliente criado com sucesso!',
+                            title: 'Enviado!',
+                            text: 'Dados enviados com sucesso. Verifique a planilha.',
                         });
                         form.reset(); // Limpa o formulário
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Erro!',
-                            text: json.error || json.message || 'Ocorreu um erro ao criar o cliente.',
-                        });
                     }
-                    
-                    // Mostrando a resposta do servidor
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Resposta!',
-                        text: 'Resposta do servidor: \n\n' + JSON.stringify(json, null, 2),
-                    });
                 })
                 .catch(error => {
                     Swal.fire({
