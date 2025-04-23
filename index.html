@@ -90,16 +90,6 @@
             background-color: #0056b3;
         }
 
-        #resposta {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 14px;
-            white-space: pre-wrap;
-            display: none; /* Inicialmente escondido */
-        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -179,7 +169,6 @@
             </select>
         </div>
         <button type="button" onclick="enviarCliente()">Enviar Cliente</button>
-        <div id="resposta"></div>
 
         <script>
             function enviarCliente() {
@@ -194,8 +183,11 @@
 
                 const params = new URLSearchParams(data);
 
-                // Removi a linha que exibia os parâmetros na div 'resposta'
-                // document.getElementById('resposta').innerText = params.toString();
+                Swal.fire({
+                    icon: 'Atenção',
+                    title: 'Envidando:',
+                    text: 'Enviando para o servidor: \n\n' + params.toString(),
+                  });
 
                 fetch(API_URL, {
                   method: 'POST',
@@ -217,8 +209,11 @@
                       text: json.message || 'Ocorreu um erro ao criar o cliente.',
                     });
                   }
-                  // Removi a linha que exibia a resposta JSON na div 'resposta'
-                  // document.getElementById('resposta').innerText = JSON.stringify(json, null, 2);
+                  Swal.fire({
+                    icon: 'Atenção',
+                    title: 'Resposta!',
+                    text: 'Resposta do servidor: \n\n' + JSON.stringify(json, null, 2),
+                  });
                 })
                 .catch(error => {
                   Swal.fire({
