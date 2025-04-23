@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatCliente</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: calc(100% - 12px);
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #resposta {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Novo Cliente</h1>
+    <form id="clienteForm">
+        <div>
+            <label for="tipo">Tipo:</label>
+            <input type="text" id="tipo" name="tipo">
+        </div>
+        <div>
+            <label for="categoria">Categoria:</label>
+            <input type="text" id="categoria" name="categoria">
+        </div>
+        <div>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
+        </div>
+        <div>
+            <label for="apelido">Apelido:</label>
+            <input type="text" id="apelido" name="apelido" required>
+        </div>
+        <div>
+            <label for="estado">Estado:</label>
+            <input type="text" id="estado" name="estado" required>
+        </div>
+        <div>
+            <label for="cidade">Cidade:</label>
+            <input type="text" id="cidade" name="cidade" required>
+        </div>
+        <div>
+            <label for="cep">CEP:</label>
+            <input type="text" id="cep" name="cep" required>
+        </div>
+        <div>
+            <label for="endereco">Endereço:</label>
+            <input type="text" id="endereco" name="endereco" required>
+        </div>
+        <div>
+            <label for="numero">Número:</label>
+            <input type="text" id="numero" name="numero" required>
+        </div>
+        <div>
+            <label for="bairro">Bairro:</label>
+            <input type="text" id="bairro" name="bairro" required>
+        </div>
+        <div>
+            <label for="celular">Celular:</label>
+            <input type="text" id="celular" name="celular" required>
+        </div>
+        <div>
+            <label for="referencia">Referência:</label>
+            <input type="text" id="referencia" name="referencia" required>
+        </div>
+        <div>
+            <label for="observacao">Observação:</label>
+            <textarea id="observacao" name="observacao"></textarea>
+        </div>
+        <div>
+            <label for="status">Status:</label>
+            <input type="text" id="status" name="status">
+        </div>
+        <button type="button" onclick="enviarCliente()">Enviar Cliente</button>
+        <div id="resposta"></div>
+
+        <script>
+            function enviarCliente() {
+                const formData = new FormData(document.getElementById('clienteForm'));
+                const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                data.action = 'createCliente'; 
+
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    document.getElementById('resposta').innerText = JSON.stringify(result, null, 2);
+                    document.getElementById('clienteForm').reset(); 
+                })
+                .catch(error => {
+                    document.getElementById('resposta').innerText = 'Erro ao enviar dados: ' + error;
+                });
+            }
+        </script>
+    </form>
+</body>
+
+</html>
