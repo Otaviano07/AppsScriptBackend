@@ -175,8 +175,8 @@
                 const form = document.getElementById('clienteForm');
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
             
-                // Coletar dados do formulário em um objeto
-                const data = {
+                // Criando objeto JavaScript com os dados do formulário
+                const jsonData = {
                     action: 'createCliente',
                     tipo: document.getElementById('tipo').value,
                     categoria: document.getElementById('categoria').value,
@@ -190,31 +190,31 @@
                     bairro: document.getElementById('bairro').value,
                     celular: document.getElementById('celular').value,
                     referencia: document.getElementById('referencia').value,
-                    observacao: document.getElementById('observacao').value,
-                    status: document.getElementById('status').value
+                    observacao: document.getElementById('observacao').value || "",
+                    status: document.getElementById('status').value || ""
                 };
             
-                // Mostrar o que está sendo enviado (exatamente como no Postman)
+                // Convertendo para string JSON
+                const jsonString = JSON.stringify(jsonData);
+            
+                // Mostrando o que será enviado
                 Swal.fire({
                     icon: 'info',
                     title: 'Enviando JSON:',
-                    text: JSON.stringify(data, null, 2)
+                    text: jsonString
                 });
             
-                // Enviar como JSON - exatamente como o Postman faz
+                // Enviando como JSON
                 fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: jsonString
                 })
-                .then(response => {
-                    console.log("Resposta recebida:", response);
-                    return response.text(); // Pegar o texto antes de tentar interpretar como JSON
-                })
+                .then(response => response.text())
                 .then(text => {
-                    console.log("Texto da resposta:", text);
+                    console.log("Resposta raw:", text);
                     try {
                         const json = JSON.parse(text);
                         if (json.id || !json.error) {
@@ -232,7 +232,6 @@
                             });
                         }
                     } catch (e) {
-                        console.error("Erro ao parsear JSON:", e);
                         Swal.fire({
                             icon: 'warning',
                             title: 'Resposta não é JSON',
@@ -241,14 +240,13 @@
                     }
                 })
                 .catch(error => {
-                    console.error("Erro na fetch:", error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Erro de Conexão!',
                         text: 'Não foi possível conectar ao servidor: ' + error
                     });
                 });
-            }
+            }    
         </script>
     </form>
 </body>
