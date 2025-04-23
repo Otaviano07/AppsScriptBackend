@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>CreatCliente</title>
 
     <style>
@@ -23,7 +24,7 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 600px; 
+            width: 600px;
         }
 
         div {
@@ -36,9 +37,9 @@
             left: 0;
             width: 100%;
             background-color: rgb(82, 82, 82);
-            padding: 10px 0; 
-            z-index: 20; 
-            text-align: center; 
+            padding: 10px 0;
+            z-index: 20;
+            text-align: center;
         }
 
         h1 {
@@ -66,6 +67,7 @@
             box-sizing: border-box;
             font-size: 16px;
         }
+
         textarea {
             resize: vertical;
             min-height: 80px;
@@ -96,8 +98,10 @@
             border-radius: 4px;
             font-size: 14px;
             white-space: pre-wrap;
+            display: none; /* Inicialmente escondido */
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -181,30 +185,49 @@
             function enviarCliente() {
                 const formData = new FormData(document.getElementById('clienteForm'));
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
-              
+
                 const data = {};
                 formData.forEach((value, key) => {
                   data[key] = value;
                 });
                 data.action = 'createCliente';
-              
+
                 const params = new URLSearchParams(data);
 
-                document.getElementById('resposta').innerText = params.toString();
-              
+                // Removi a linha que exibia os parâmetros na div 'resposta'
+                // document.getElementById('resposta').innerText = params.toString();
+
                 fetch(API_URL, {
                   method: 'POST',
                   body: params
                 })
                 .then(response => response.json())
                 .then(json => {
-                
-                  document.getElementById('resposta').innerText = JSON.stringify(json, null, 2);
+                  if (json.status === 'success') {
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Sucesso!',
+                      text: json.message || 'Cliente criado com sucesso!',
+                    });
+                    document.getElementById('clienteForm').reset(); // Limpa o formulário
+                  } else {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Erro!',
+                      text: json.message || 'Ocorreu um erro ao criar o cliente.',
+                    });
+                  }
+                  // Removi a linha que exibia a resposta JSON na div 'resposta'
+                  // document.getElementById('resposta').innerText = JSON.stringify(json, null, 2);
                 })
                 .catch(error => {
-                  document.getElementById('resposta').innerText = 'Erro: ' + error;
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Erro de Conexão!',
+                    text: 'Não foi possível conectar ao servidor: ' + error,
+                  });
                 });
-              }              
+              }
         </script>
     </form>
 </body>
