@@ -176,50 +176,51 @@
                 const formData = new FormData(form);
                 const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
             
-                // Convertendo FormData para objeto
-                const data = {};
-                formData.forEach((value, key) => {
-                    data[key] = value;
-                });
-                data.action = 'createCliente';
+                // Criamos um formulário temporário
+                const tempForm = document.createElement('form');
+                tempForm.method = 'POST';
+                tempForm.action = API_URL;
+                tempForm.target = '_blank'; // Pode usar um iframe oculto se não quiser abrir uma nova aba
             
-                // Método 1: Envio via URLSearchParams (compatível com Google Apps Script)
-                const params = new URLSearchParams();
-                for (const key in data) {
-                    params.append(key, data[key]);
-                }
-                
+                // Adicionar action
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'createCliente';
+                tempForm.appendChild(actionInput);
+            
+                // Adicionar todos os campos do formulário original
+                formData.forEach((value, key) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    tempForm.appendChild(input);
+                });
+            
                 // Mostrar o que está sendo enviado
+                let paramsText = 'action=createCliente';
+                formData.forEach((value, key) => {
+                    paramsText += `&${key}=${value}`;
+                });
+            
                 Swal.fire({
                     icon: 'info',
                     title: 'Enviando:',
-                    text: 'Enviando para o servidor:\n\n' + params.toString(),
-                });
-            
-                // Usando fetch com modo no-cors para evitar problemas de CORS
-                fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',  // Importante para o Google Apps Script
-                    body: params
-                })
-                .then(response => {
-                    // Como estamos usando no-cors, não podemos acessar os dados da resposta
-                    // Mas podemos verificar se a requisição foi realizada
-                    if (response.type === 'opaque') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Enviado!',
-                            text: 'Dados enviados com sucesso. Verifique a planilha.',
-                        });
-                        form.reset(); // Limpa o formulário
+                    text: 'Enviando para o servidor:\n\n' + paramsText,
+                    showCancelButton: true,
+                    confirmButtonText: 'Enviar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Adicionar o formulário ao body, enviar e remover
+                        document.body.appendChild(tempForm);
+                        tempForm.submit();
+                        document.body.removeChild(tempForm);
+                        
+                        // Limpar o formulário original
+                        form.reset();
                     }
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro de Conexão!',
-                        text: 'Não foi possível conectar ao servidor: ' + error,
-                    });
                 });
             }
         </script>
