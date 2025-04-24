@@ -168,12 +168,43 @@
                 <option value="Inativo">Inativo</option>
             </select>
         </div>
-        <button type="button" onclick="enviarCliente()">Enviar Cliente</button>
+        <button type="button" onclick="sendClient()">Enviar Cliente</button>
+        <button type="button" onclick="getClient()">Buscar Cliente</button>
 
         <script>
-            async function enviarCliente() {
+            const urlApi = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
 
-                const urlApi = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
+            async function getClient() {
+                const requestOptions = {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(
+                        {
+                            action: "readClientes"
+                        })
+                }
+
+                let response = await fetch(urlApi, requestOptions);
+
+                if (!response.ok) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Ocorreu um erro ao buscar os dados. Tente novamente mais tarde.'
+                    });
+                    return;
+                } else{
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: 'Segue clientes: \n' + response.text,
+                    })
+                }
+            }
+            async function sendClient() {
                 // Campos obrigatórios
                 const camposObrigatorios = [
                     'tipo', 'categoria', 'nome', 'apelido', 'estado',
@@ -242,9 +273,24 @@
                 }
 
                 let response = await fetch(urlApi, requestOptions);
-                let data = await response.text();
-                console.log(data);
 
+                if (!response.ok) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Ocorreu um erro ao enviar os dados. Tente novamente mais tarde.'
+                    });
+                    return;
+                } else{
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: 'Cliente criado com sucesso!\nID: ' + response.id,
+                    }).then(() => {
+                        // Limpar o formulário após o envio
+                        document.getElementById('clienteForm').reset();
+                    })
+                }
             }
         </script>
     </form>
