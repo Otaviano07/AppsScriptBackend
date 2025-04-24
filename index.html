@@ -172,12 +172,34 @@
 
         <script>
             function enviarCliente() {
-                const form = document.getElementById('clienteForm');
-                const API_URL = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
-            
-                // Coletar dados do formulário em um objeto
-                const data = {
-                    action: 'createCliente',
+                // Campos obrigatórios
+                const camposObrigatorios = [
+                    'tipo', 'categoria', 'nome', 'apelido', 'estado', 
+                    'cidade', 'cep', 'endereco', 'numero', 'bairro', 
+                    'celular', 'referencia', 'status'
+                ];
+                
+                // Verificar se todos os campos obrigatórios estão preenchidos
+                let camposVazios = [];
+                for (const campo of camposObrigatorios) {
+                    const valor = document.getElementById(campo).value.trim();
+                    if (!valor) {
+                        camposVazios.push(campo);
+                    }
+                }
+                
+                if (camposVazios.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Campos obrigatórios',
+                        text: `Por favor, preencha os seguintes campos: ${camposVazios.join(', ')}`
+                    });
+                    return;
+                }
+                
+                // Coletar dados do formulário
+                const dadosCliente = {
+                    action: "createCliente",
                     tipo: document.getElementById('tipo').value,
                     categoria: document.getElementById('categoria').value,
                     nome: document.getElementById('nome').value,
@@ -193,62 +215,59 @@
                     observacao: document.getElementById('observacao').value,
                     status: document.getElementById('status').value
                 };
-            
-                // Mostrar o que está sendo enviado (exatamente como no Postman)
+                
+                // Mostrar loading
                 Swal.fire({
-                    icon: 'info',
-                    title: 'Enviando JSON:',
-                    text: JSON.stringify(data, null, 2)
+                    title: 'Enviando...',
+                    text: 'Aguarde enquanto enviamos os dados',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
                 });
-            
-                // Enviar como JSON - exatamente como o Postman faz
-                fetch(API_URL, {
+                
+                // Enviar para a API
+                fetch('https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(dadosCliente)
                 })
                 .then(response => {
-                    console.log("Resposta recebida:", response);
-                    return response.text(); // Pegar o texto antes de tentar interpretar como JSON
-                })
-                .then(text => {
-                    console.log("Texto da resposta:", text);
-                    try {
-                        const json = JSON.parse(text);
-                        if (json.id || !json.error) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Sucesso!',
-                                text: 'Cliente criado com sucesso!'
-                            });
-                            form.reset();
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Erro!',
-                                text: json.error || 'Erro ao criar cliente'
-                            });
-                        }
-                    } catch (e) {
-                        console.error("Erro ao parsear JSON:", e);
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Resposta não é JSON',
-                            text: text
-                        });
+                    if (!response.ok) {
+                        throw new Error('Erro na resposta da rede');
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Sucesso
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cliente cadastrado!',
+                        text: `ID do cliente: ${data.id}`,
+                        confirmButtonText: 'Ok'
+                    });
+                    
+                    // Limpar formulário
+                    document.getElementById('clienteForm').reset();
                 })
                 .catch(error => {
-                    console.error("Erro na fetch:", error);
+                    console.error('Erro:', error);
+                    
                     Swal.fire({
                         icon: 'error',
-                        title: 'Erro de Conexão!',
-                        text: 'Não foi possível conectar ao servidor: ' + error
+                        title: 'Erro ao cadastrar cliente',
+                        text: error.message || 'Ocorreu um erro ao tentar cadastrar o cliente.',
+                        confirmButtonText: 'Tentar novamente'
                     });
                 });
-            }    
+            }
         </script>
     </form>
 </body>
