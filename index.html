@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>CreatCliente</title>
 
@@ -90,6 +91,45 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        .client-list {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .btn-primary {
+            background-color: #28a745;
+        }
+
+        .btn-secondary {
+            background-color: #17a2b8;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -168,129 +208,130 @@
                 <option value="Inativo">Inativo</option>
             </select>
         </div>
-        <button type="button" onclick="sendClient()">Enviar Cliente</button>
-        <button type="button" onclick="getClient()">Buscar Cliente</button>
+        <section id="clientList" class="client-list">
+            <h2>Clientes Cadastrados</h2>
+            <div class="table-container"></div>
+        </section>
+
+        <div class="form-actions">
+            <button type="button" class="btn-primary" onclick="sendClient()">
+                <i class="fas fa-save"></i> Salvar Cliente
+            </button>
+            <button type="button" class="btn-secondary" onclick="getClient()">
+                <i class="fas fa-search"></i> Buscar Clientes
+            </button>
+        </div>
 
         <script>
             const urlApi = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
 
-            async function getClient() {
-                const requestOptions = {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(
-                        {
-                            action: "readClientes"
-                        })
-                }
+            // Configuração comum para as requisições
+            const commonHeaders = {
+                'Content-Type': 'application/json'
+            };
 
-                let response = await fetch(urlApi, requestOptions);
-
-                if (!response.ok) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro!',
-                        text: 'Ocorreu um erro ao buscar os dados. Tente novamente mais tarde.'
+            async function handleApiCall(action, data) {
+                try {
+                    const response = await fetch(urlApi, {
+                        method: 'POST',
+                        headers: commonHeaders,
+                        body: JSON.stringify({ action, ...data })
                     });
-                    return;
-                } else{
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Sucesso!',
-                        text: 'Segue clientes: \n' + response.text,
-                    })
+
+                    if (!response.ok) throw new Error('Erro na requisição');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erro:', error);
+                    throw error;
                 }
             }
+
+            // Função para mostrar feedback visual
+            function showAlert(icon, title, text) {
+                Swal.fire({
+                    icon,
+                    title,
+                    text,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+
+            // Função para obter valores do formulário
+            function getFormData(formId) {
+                const form = document.getElementById(formId);
+                const formData = new FormData(form);
+                return Object.fromEntries(formData.entries());
+            }
+
+            // Função para buscar clientes
+            async function getClient() {
+                try {
+                    const data = await handleApiCall('readClientes');
+                    displayClients(data);
+                } catch (error) {
+                    showAlert('error', 'Erro!', 'Falha ao buscar clientes');
+                }
+            }
+
+            // Função para exibir clientes em uma tabela
+            function displayClients(clients) {
+                const container = document.getElementById('clientList');
+                // Implementar lógica para criar tabela dinâmica
+            }
+
+            // Função para enviar cliente
             async function sendClient() {
-                // Campos obrigatórios
-                const camposObrigatorios = [
+                try {
+                    const formData = getFormData('clienteForm');
+                    const requiredFields = [
+                        'tipo',
+                        'categoria',
+                        'nome',
+                        'apelido',
+                        'estado',
+                        'cidade',
+                        'cep',
+                        'endereco',
+                        'numero',
+                        'bairro',
+                        'celular',
+                        'referencia',
+                        'status'
+                    ];
+
+                    if (!validateForm(requiredFields, formData)) return;
+
+                    Swal.showLoading();
+                    const { id } = await handleApiCall('createCliente', formData);
+
+                    showAlert('success', 'Sucesso!', `Cliente criado ID: ${id}`);
+                    document.getElementById('clienteForm').reset();
+                } catch (error) {
+                    showAlert('error', 'Erro!', error.message);
+                }
+            }
+
+            // Validação de campos
+            function validateForm() {
+                const requiredFields = [
                     'tipo', 'categoria', 'nome', 'apelido', 'estado',
                     'cidade', 'cep', 'endereco', 'numero', 'bairro',
                     'celular', 'referencia', 'status'
                 ];
 
-                // Verificar se todos os campos obrigatórios estão preenchidos
-                let camposVazios = [];
-                for (const campo of camposObrigatorios) {
-                    const valor = document.getElementById(campo).value.trim();
-                    if (!valor) {
-                        camposVazios.push(campo);
-                    }
-                }
-
-                if (camposVazios.length > 0) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Campos obrigatórios',
-                        text: `Por favor, preencha os seguintes campos: ${camposVazios.join(', ')}`
-                    });
-                    return;
-                }
-
-                // Coletar dados do formulário
-                const dadosCliente = {
-
-                };
-
-                // Mostrar loading
-                Swal.fire({
-                    title: 'Enviando...',
-                    text: 'Aguarde enquanto enviamos os dados',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    didOpen: () => {
-                        Swal.showLoading();
+                let isValid = true;
+                requiredFields.forEach(field => {
+                    const value = document.getElementById(field).value.trim();
+                    if (!value) {
+                        isValid = false;
+                        document.getElementById(field).classList.add('error');
+                    } else {
+                        document.getElementById(field).classList.remove('error');
                     }
                 });
 
-                const requestOptions = {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(
-                        {
-                            action: "createCliente",
-                            tipo: document.getElementById('tipo').value,
-                            categoria: document.getElementById('categoria').value,
-                            nome: document.getElementById('nome').value,
-                            apelido: document.getElementById('apelido').value,
-                            estado: document.getElementById('estado').value,
-                            cidade: document.getElementById('cidade').value,
-                            cep: document.getElementById('cep').value,
-                            endereco: document.getElementById('endereco').value,
-                            numero: document.getElementById('numero').value,
-                            bairro: document.getElementById('bairro').value,
-                            celular: document.getElementById('celular').value,
-                            referencia: document.getElementById('referencia').value,
-                            observacao: document.getElementById('observacao').value,
-                            status: document.getElementById('status').value
-                        })
-                }
-
-                let response = await fetch(urlApi, requestOptions);
-
-                if (!response.ok) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro!',
-                        text: 'Ocorreu um erro ao enviar os dados. Tente novamente mais tarde.'
-                    });
-                    return;
-                } else{
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Sucesso!',
-                        text: 'Cliente criado com sucesso!\nID: ' + response.id,
-                    }).then(() => {
-                        // Limpar o formulário após o envio
-                        document.getElementById('clienteForm').reset();
-                    })
-                }
+                return isValid;
             }
         </script>
     </form>
