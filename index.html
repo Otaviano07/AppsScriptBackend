@@ -44,7 +44,8 @@
 
         h1 {
             color: #ffffff;
-            margin: 0; /* Remove a margem padrão do h1 para centralizar corretamente dentro da barra */
+            margin: 0;
+            /* Remove a margem padrão do h1 para centralizar corretamente dentro da barra */
         }
 
         label {
@@ -89,7 +90,6 @@
         button:hover {
             background-color: #0056b3;
         }
-
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -171,14 +171,16 @@
         <button type="button" onclick="enviarCliente()">Enviar Cliente</button>
 
         <script>
-            function enviarCliente() {
+            async function enviarCliente() {
+
+                const urlApi = 'https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec';
                 // Campos obrigatórios
                 const camposObrigatorios = [
-                    'tipo', 'categoria', 'nome', 'apelido', 'estado', 
-                    'cidade', 'cep', 'endereco', 'numero', 'bairro', 
+                    'tipo', 'categoria', 'nome', 'apelido', 'estado',
+                    'cidade', 'cep', 'endereco', 'numero', 'bairro',
                     'celular', 'referencia', 'status'
                 ];
-                
+
                 // Verificar se todos os campos obrigatórios estão preenchidos
                 let camposVazios = [];
                 for (const campo of camposObrigatorios) {
@@ -187,7 +189,7 @@
                         camposVazios.push(campo);
                     }
                 }
-                
+
                 if (camposVazios.length > 0) {
                     Swal.fire({
                         icon: 'error',
@@ -196,26 +198,12 @@
                     });
                     return;
                 }
-                
+
                 // Coletar dados do formulário
                 const dadosCliente = {
-                    action: "createCliente",
-                    tipo: document.getElementById('tipo').value,
-                    categoria: document.getElementById('categoria').value,
-                    nome: document.getElementById('nome').value,
-                    apelido: document.getElementById('apelido').value,
-                    estado: document.getElementById('estado').value,
-                    cidade: document.getElementById('cidade').value,
-                    cep: document.getElementById('cep').value,
-                    endereco: document.getElementById('endereco').value,
-                    numero: document.getElementById('numero').value,
-                    bairro: document.getElementById('bairro').value,
-                    celular: document.getElementById('celular').value,
-                    referencia: document.getElementById('referencia').value,
-                    observacao: document.getElementById('observacao').value,
-                    status: document.getElementById('status').value
+
                 };
-                
+
                 // Mostrar loading
                 Swal.fire({
                     title: 'Enviando...',
@@ -226,47 +214,37 @@
                         Swal.showLoading();
                     }
                 });
-                
-                // Enviar para a API
-                fetch('https://script.google.com/macros/s/AKfycbyxghx4CF7bWHiMy6g8Y8GBJunNh8xYXtKhPlT0qqByhypAwUTjivQyb3HPN2gBWgBccA/exec', {
+
+                const requestOptions = {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(dadosCliente)
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro na resposta da rede');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
-                    
-                    // Sucesso
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Cliente cadastrado!',
-                        text: `ID do cliente: ${data.id}`,
-                        confirmButtonText: 'Ok'
-                    });
-                    
-                    // Limpar formulário
-                    document.getElementById('clienteForm').reset();
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro ao cadastrar cliente',
-                        text: error.message || 'Ocorreu um erro ao tentar cadastrar o cliente.',
-                        confirmButtonText: 'Tentar novamente'
-                    });
-                });
+                    body: JSON.stringify(
+                        {
+                            action: "createCliente",
+                            tipo: document.getElementById('tipo').value,
+                            categoria: document.getElementById('categoria').value,
+                            nome: document.getElementById('nome').value,
+                            apelido: document.getElementById('apelido').value,
+                            estado: document.getElementById('estado').value,
+                            cidade: document.getElementById('cidade').value,
+                            cep: document.getElementById('cep').value,
+                            endereco: document.getElementById('endereco').value,
+                            numero: document.getElementById('numero').value,
+                            bairro: document.getElementById('bairro').value,
+                            celular: document.getElementById('celular').value,
+                            referencia: document.getElementById('referencia').value,
+                            observacao: document.getElementById('observacao').value,
+                            status: document.getElementById('status').value
+                        })
+                }
+
+                let response = await fetch(url, requestOptions);
+                let data = await response.text();
+                console.log(data);
+
             }
         </script>
     </form>
